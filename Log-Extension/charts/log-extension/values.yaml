@@ -2,8 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# Set this to containerd or crio if you want to collect CRI format logs
-containerRuntime: docker
 #  If you want to deploy a default Fluent Bit pipeline (including Fluent Bit Input, Filter, and output) to collect Kubernetes logs, you'll need to set the Kubernetes parameter to true
 # see https://github.com/fluent/fluent-operator/tree/master/manifests/logging-stack
 Kubernetes: true
@@ -84,50 +82,6 @@ fluentbit:
     systemd:
       enable: true
 
-
-fluentd:
-  # Installs a sub chart carrying the CRDs for the fluentd controller. The sub chart is enabled by default.
-  crdsEnable: true
-  enable: false
-  name: fluentd
-  port: 24224
-  image:
-    repository: "kubesphere/fluentd"
-    tag: "v1.15.3"
-  replicas: 1
-  forward:
-    port: 24224
-  watchedNamespaces:
-    - kube-system
-    - default
-  resources:
-    limits:
-      cpu: 500m
-      memory: 500Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-  # Configure the output plugin parameter in Fluentd.
-  # Fluentd is disabled by default, if you enable it make sure to also set up an output to use.
-  output:
-    es:
-      enable: false
-      host: elasticsearch-logging-data.kubesphere-logging-system.svc
-      port: 9200
-      logstashPrefix: ks-logstash-log
-      buffer:
-        enable: false
-        type: file
-        path: /buffers/es
-    kafka:
-      enable: false
-      brokers: "my-cluster-kafka-bootstrap.default.svc:9091,my-cluster-kafka-bootstrap.default.svc:9092,my-cluster-kafka-bootstrap.default.svc:9093"
-      topicKey: kubernetes_ns
-      buffer:
-        enable: false
-        type: file
-        path: /buffers/kafka
-    opensearch: {}
 
 nameOverride: ""
 fullnameOverride: ""
