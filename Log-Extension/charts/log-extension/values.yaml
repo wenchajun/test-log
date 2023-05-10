@@ -1,50 +1,134 @@
-# Default values for demo.
+# Default values for fluentbit-operator.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
+# Set this to containerd or crio if you want to collect CRI format logs
+containerRuntime: docker
+#  If you want to deploy a default Fluent Bit pipeline (including Fluent Bit Input, Filter, and output) to collect Kubernetes logs, you'll need to set the Kubernetes parameter to true
+# see https://github.com/fluent/fluent-operator/tree/master/manifests/logging-stack
+Kubernetes: true
 
-image:
-  repository: ks-extension-demo-backend
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+fluentbit:
+  enable: true
 
-imagePullSecrets: []
+  # Set a limit of memory that Tail plugin can use when appending data to the Engine.
+  # You can find more details here: https://docs.fluentbit.io/manual/pipeline/inputs/tail#config
+  # If the limit is reach, it will be paused; when the data is flushed it resumes.
+  # if the inbound traffic is less than 2.4Mbps, setting memBufLimit to 5MB is enough
+  # if the inbound traffic is less than 4.0Mbps, setting memBufLimit to 10MB is enough
+  # if the inbound traffic is less than 13.64Mbps, setting memBufLimit to 50MB is enough
+  input:
+    tail:
+      enable: true
+      refreshIntervalSeconds: 10
+      memBufLimit: 5MB
+      path: "/var/log/containers/*.log"
+      skipLongLines: true
+    systemd:
+      enable: true
+      path: "/var/log/journal"
+      includeKubelet: true
+    nodeExporterMetrics: {}
+    # uncomment below nodeExporterMetrics section if you want to collect node exporter metrics
+  #   nodeExporterMetrics:
+  #     tag: node_metrics
+  #     scrapeInterval: 15s
+  #     path:
+  #       procfs: /host/proc
+  #       sysfs: /host/sys
+
+  # Configure the output plugin parameter in FluentBit.
+  # You can set enable to true to output logs to the specified location.
+  output:
+    #  You can find more supported output plugins here: https://github.com/fluent/fluent-operator/tree/master/docs/plugins/fluentbit/clusteroutput
+    es:
+      enable: false
+      host: "<Elasticsearch url like elasticsearch-logging-data.kubesphere-logging-system.svc>"
+      port: 9200
+      logstashPrefix: ks-logstash-log
+    #      path: ""
+    #      bufferSize: "4KB"
+    #      index: "fluent-bit"
+    #      httpUser:
+    #      httpPassword:
+    #      logstashFormat: true
+    #      replaceDots: false
+    #      enableTLS: false
+    #      tls:
+    #        verify: On
+    #        debug: 1
+    #        caFile: "<Absolute path to CA certificate file>"
+    #        caPath: "<Absolute path to scan for certificate files>"
+    #        crtFile: "<Absolute path to private Key file>"
+    #        keyFile: "<Absolute path to private Key file>"
+    #        keyPassword:
+    #        vhost: "<Hostname to be used for TLS SNI extension>"
+    # You can configure the opentelemetry-related configuration here
+    opensearch: {}
+    # You can configure the opensearch-related configuration here
+    stdout:
+      enable: false
+
+  # Configure the default filters in FluentBit.
+  # The `filter` will filter and parse the collected log information and output the logs into a uniform format. You can choose whether to turn this on or not.
+  filter:
+    kubernetes:
+      enable: true
+      labels: false
+      annotations: false
+    containerd:
+      # This is customized lua containerd log format converter, you can refer here:
+      # https://github.com/fluent/fluent-operator/blob/master/charts/fluent-operator/templates/fluentbit-clusterfilter-containerd.yaml
+      # https://github.com/fluent/fluent-operator/blob/master/charts/fluent-operator/templates/fluentbit-containerd-config.yaml
+      enable: true
+    systemd:
+      enable: true
+
+
+fluentd:
+  # Installs a sub chart carrying the CRDs for the fluentd controller. The sub chart is enabled by default.
+  crdsEnable: true
+  enable: false
+  name: fluentd
+  port: 24224
+  image:
+    repository: "kubesphere/fluentd"
+    tag: "v1.15.3"
+  replicas: 1
+  forward:
+    port: 24224
+  watchedNamespaces:
+    - kube-system
+    - default
+  resources:
+    limits:
+      cpu: 500m
+      memory: 500Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  # Configure the output plugin parameter in Fluentd.
+  # Fluentd is disabled by default, if you enable it make sure to also set up an output to use.
+  output:
+    es:
+      enable: false
+      host: elasticsearch-logging-data.kubesphere-logging-system.svc
+      port: 9200
+      logstashPrefix: ks-logstash-log
+      buffer:
+        enable: false
+        type: file
+        path: /buffers/es
+    kafka:
+      enable: false
+      brokers: "my-cluster-kafka-bootstrap.default.svc:9091,my-cluster-kafka-bootstrap.default.svc:9092,my-cluster-kafka-bootstrap.default.svc:9093"
+      topicKey: kubernetes_ns
+      buffer:
+        enable: false
+        type: file
+        path: /buffers/kafka
+    opensearch: {}
+
 nameOverride: ""
 fullnameOverride: ""
-
-podAnnotations: {}
-
-podSecurityContext: {}
-# fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-# runAsNonRoot: true
-# runAsUser: 1000
-
-service:
-  type: ClusterIP
-  port: 80
-
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-#   cpu: 100m
-#   memory: 128Mi
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
+namespaceOverride: ""
