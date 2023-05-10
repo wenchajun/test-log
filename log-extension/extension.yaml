@@ -9,6 +9,7 @@ description:
   en: Log extension for collecting platform logs
 keywords:
   - Logging
+  - Observability
 home: https://kubesphere.io
 sources:
   - https://github.com/kubesphere
