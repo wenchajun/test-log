@@ -1,0 +1,26 @@
+kind: ClusterRole
+rules:
+  - verbs:
+      - 'create'
+      - 'patch'
+      - 'update'
+      - 'get'
+    apiGroups:
+      - 'extensions.kubesphere.io'
+    resources:
+      - '*'
+  - verbs:
+      - '*'
+    apiGroups:
+      - 'fluentbit.fluent.io'
+    resources:
+      - 'clusterfluentbitconfigs'
+      - 'clusteroutputs'
+      - 'clusterfilters'
+      - 'clusterinputs'
+  - verbs:
+      - '*'
+    apiGroups:
+      - ''
+    resources:
+      - 'configmaps'
