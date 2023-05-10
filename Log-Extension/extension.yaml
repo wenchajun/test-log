@@ -1,0 +1,17 @@
+apiVersion: v1
+name: Log Extension
+version: 0.1.0
+displayName:
+  zh: 日志扩展组件
+  en: Log Extension
+description:
+  zh: 这是一个示例扩展组件，这是它的描述
+  en: This is a sample extension, and this is its description
+keywords:
+  - Logging
+home: https://kubesphere.io
+sources:
+  - https://github.com/kubesphere
+kubeVersion: ">=1.19.0"
+ksVersion: ">=3.0.0"
+icon: ./favicon.svg
