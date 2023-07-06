@@ -57,6 +57,7 @@ fluentbit:
             key: "password"
             name: "opensearch-credentials"
       logstashFormat: true
+      enableTLS: true
       tls:
         verify: false
     #      path: ""
