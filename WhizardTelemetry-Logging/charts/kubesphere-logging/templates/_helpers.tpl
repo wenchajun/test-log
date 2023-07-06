@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "fluentbit-operator.name" -}}
+{{- define "kubeSphere-logging.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "fluentbit-operator.fullname" -}}
+{{- define "kubeSphere-logging.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -27,16 +27,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "fluentbit-operator.chart" -}}
+{{- define "kubeSphere-logging.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "fluentbit-operator.labels" -}}
-helm.sh/chart: {{ include "fluentbit-operator.chart" . }}
-{{ include "fluentbit-operator.selectorLabels" . }}
+{{- define "kubeSphere-logging.labels" -}}
+helm.sh/chart: {{ include "kubeSphere-logging.chart" . }}
+{{ include "kubeSphere-logging.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -44,19 +44,30 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
+Allow the release namespace to be overridden for multi-namespace deployments in combined charts
+*/}}
+{{- define "kubeSphere-logging.namespace" -}}
+  {{- if .Values.namespaceOverride -}}
+    {{- .Values.namespaceOverride -}}
+  {{- else -}}
+    {{- .Release.Namespace -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
 Selector labels
 */}}
-{{- define "fluentbit-operator.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "fluentbit-operator.name" . }}
+{{- define "kubeSphere-logging.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "kubeSphere-logging.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "fluentbit-operator.serviceAccountName" -}}
+{{- define "kubeSphere-logging.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "fluentbit-operator.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "kubeSphere-logging.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

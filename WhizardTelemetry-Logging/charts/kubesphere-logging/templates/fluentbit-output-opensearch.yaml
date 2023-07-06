@@ -1,0 +1,45 @@
+{{- if .Values.Kubernetes -}}
+{{- if .Values.fluentbit.enable -}}
+{{- if .Values.fluentbit.output.opensearch -}}
+apiVersion: fluentbit.fluent.io/v1alpha2
+kind: ClusterOutput
+metadata:
+  name: fluentd-output-opensearch
+  labels:
+    fluentbit.fluent.io/enabled: "true"
+    fluentbit.fluent.io/component: logging
+spec:
+  matchRegex: (?:kube|service)\.(.*)
+  opensearch:
+    host: {{ .Values.fluentbit.output.opensearch.host }}
+    port: {{ .Values.fluentbit.output.opensearch.port }}
+{{- if .Values.fluentbit.output.opensearch.path }}
+    path: {{ .Values.fluentbit.output.opensearch.path }}
+{{- end }}
+{{- if .Values.fluentbit.output.opensearch.bufferSize }}
+    bufferSize: {{ .Values.fluentbit.output.opensearch.bufferSize }}
+{{- end }}
+{{- if .Values.fluentbit.output.opensearch.index }}
+    index: {{ .Values.fluentbit.output.opensearch.index }}
+{{- end }}
+{{- if .Values.fluentbit.output.opensearch.httpUser }}
+    httpUser:
+{{ toYaml .Values.fluentbit.output.opensearch.httpUser | indent 6 }}
+{{- end }}
+{{- if .Values.fluentbit.output.opensearch.httpPassword }}
+    httpPassword:
+{{ toYaml .Values.fluentbit.output.opensearch.httpPassword | indent 6 }}
+{{- end }}
+    logstashFormat: {{ .Values.fluentbit.output.opensearch.logstashFormat | default true }}
+    logstashPrefix: {{ .Values.fluentbit.output.opensearch.logstashPrefix | default "ks-logstash-log" | quote }}
+    replaceDots: {{ .Values.fluentbit.output.opensearch.replaceDots | default false }}
+    generateID: true
+    timeKey: "@timestamp"
+    suppressTypeName: true
+{{- if .Values.fluentbit.output.opensearch.enableTLS }}
+    tls:
+{{ toYaml .Values.fluentbit.output.opensearch.tls | indent 6 }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -25,3 +25,17 @@ rules:
     resources:
       - 'configmaps'
       - 'secrets'
+      - 'services'
+  - verbs:
+      - '*'
+    apiGroups:
+      - 'apps'
+    resources:
+      - 'deployments'
+  - verbs:
+      - '*'
+    apiGroups:
+      - 'admissionregistration.k8s.io'
+    resources:
+      - '*'
+      

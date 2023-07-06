@@ -41,21 +41,29 @@ fluentbit:
   # You can set enable to true to output logs to the specified location.
   output:
     #  You can find more supported output plugins here: https://github.com/fluent/fluent-operator/tree/master/docs/plugins/fluentbit/clusteroutput
-    es:
-      enable: false
-      host: "<Elasticsearch url like elasticsearch-logging-data.kubesphere-logging-system.svc>"
+    opensearch:
+      enable: true
+      host: "opensearch-cluster-master.kubesphere-logging-system.svc"
       port: 9200
       logstashPrefix: ks-logstash-log
+      httpUser:
+        valueFrom:
+          secretKeyRef:
+            key: "username"
+            name: "opensearch-credentials"
+      httpPassword:
+        valueFrom:
+          secretKeyRef:
+            key: "password"
+            name: "opensearch-credentials"
+      logstashFormat: true
+      tls:
+        verify: false
     #      path: ""
     #      bufferSize: "4KB"
-    #      index: "fluent-bit"
-    #      httpUser:
-    #      httpPassword:
-    #      logstashFormat: true
+    #      index: "fluent-bit"    
     #      replaceDots: false
     #      enableTLS: false
-    #      tls:
-    #        verify: On
     #        debug: 1
     #        caFile: "<Absolute path to CA certificate file>"
     #        caPath: "<Absolute path to scan for certificate files>"
@@ -64,8 +72,6 @@ fluentbit:
     #        keyPassword:
     #        vhost: "<Hostname to be used for TLS SNI extension>"
     # You can configure the opentelemetry-related configuration here
-    opensearch: {}
-    # You can configure the opensearch-related configuration here
     stdout:
       enable: false
 
@@ -87,4 +93,4 @@ fluentbit:
 
 nameOverride: ""
 fullnameOverride: ""
-namespaceOverride: ""
+namespaceOverride: "kubesphere-logging-system"
