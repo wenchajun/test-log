@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: fluent-bit-lua
+  namespace: {{ template "kubeSphere-logging.namespace" . }}
 data:
   systemd.lua: |
     function add_time(tag, timestamp, record)
